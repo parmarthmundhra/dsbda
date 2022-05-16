@@ -1,0 +1,275 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[1]:
+
+
+get_ipython().system('pip list')
+
+
+# In[2]:
+
+
+##Step1:
+##already nltk(natural language text analysis package) is installed
+##else use !pip install nltk
+
+
+# In[2]:
+
+
+pip install nltk
+
+
+# In[1]:
+
+
+import nltk
+
+
+# In[ ]:
+
+
+##Step 2:Tokenization
+##i)Sentence tokenization
+##II)word Tokenization
+
+
+
+# In[ ]:
+
+
+from nltk import tokenize
+##I)Sentence tokenization
+from nltk.tokenize import sent_tokenize
+text=""" Good Day Everyone,How are you all today?Its Fun learning Data Analysis. Hope you all are practicing well."""
+text
+
+
+# In[ ]:
+
+
+tokenized_text=sent_tokenize(text)
+print(tokenized_text)
+
+
+# In[ ]:
+
+
+##Word tokenization
+from nltk.tokenize import word_tokenize
+tokenized_word=word_tokenize(text)
+print(tokenized_word)
+
+
+# In[ ]:
+
+
+##Frequency Distribution
+from nltk.probability import FreqDist
+fdist=FreqDist(tokenized_word)
+print(fdist)
+
+
+# In[ ]:
+
+
+fdist.most_common(4)##4 sets of common words and their respective frequency
+
+
+# In[ ]:
+
+
+##Frequency Distribution Plot
+import matplotlib.pyplot as plt
+fdist.plot(30,cumulative=False)
+plt.show()
+
+
+# In[ ]:
+
+
+##stopwords
+nltk.download('stopwords')
+from nltk.corpus import stopwords
+stop_words=set(stopwords.words("english"))
+print(stop_words)
+
+
+# In[ ]:
+
+
+##removing Stopwords
+filtered_sent=[]
+for w in tokenized_words:
+    if w not in stop_words:
+        filtered_sent.append(w)
+print("Tokenized Sentence :",tokenized_words)
+print("Filtered Sentence:",filtered_sent)
+
+
+# In[ ]:
+
+
+##Step3:Lexicon Normalization
+##A.Stemming: to reduce word to its root
+
+
+# In[ ]:
+
+
+from nltk.stem import PorterStemmer
+from nltk.tokenize import sent_tokenize,word_tokenize
+ps=PorterStemmer()
+stemmed_words=[]
+for w in filtered_sent:
+    stemmed_words.append(ps.stem(w))
+print("Filtered Sentence:",filtered_sent)
+print("Stemmed Sentence:",stemmed_words)
+
+
+# In[ ]:
+
+
+##B.Lemmatization:reduce to the base word
+##better to good
+nltk.download('wordnet')
+from nltk.stem.wordnet import WordNetLemmatizer
+lem=WordNetLemmatizer()
+from nltk.stem.porter import PorterStemmer
+stem=PorterStemmer()
+word="flying"
+print("Lemmatized Word:",lem.lemmatize(word,"v"))
+print("Stemmed Word:",stem.stem(word))
+
+
+# In[ ]:
+
+
+##Step 4: POS tagging:Part of Speech to identify grammatical group of word
+
+
+# In[ ]:
+
+
+sent="Albert Einstein was born in Ulm,Germany in 1879."
+tokens=nltk.word_tokenize(sent)
+print(tokens)
+
+
+# In[ ]:
+
+
+nltk.download('averaged_perceptron_tagger')
+nltk.pos_tag(tokens)
+
+
+# In[ ]:
+
+
+##Step 5: Feature Generation using TF-IDF
+##TF=term freq IDF= inverse document freq=log(#documents/#documents containing that word)
+
+
+# In[2]:
+
+
+import pandas as pd
+from google.colab import files
+uploaded=files.upload()
+
+
+# In[8]:
+
+
+data1=pd.read_csv('samplestudent.csv',header=0)
+
+
+# In[9]:
+
+
+data1
+
+
+# In[10]:
+
+
+data1.dtypes
+
+
+# In[ ]:
+
+
+
+
+
+# In[12]:
+
+
+data=pd.read_csv("samplestudent.csv",header=0,usecols=['Name','Calling Remark','Intersted(Y/N'])
+
+
+# In[13]:
+
+
+data
+
+
+# In[14]:
+
+
+data['Calling Remark']=data['Calling Remark'].fillna('done')
+data.head(10)
+
+
+# In[15]:
+
+
+data['Intersted(Y/N']=data['Intersted(Y/N'].fillna('done')
+
+
+# In[16]:
+
+
+data
+
+
+# In[17]:
+
+
+data.isnull().sum()
+
+
+# In[18]:
+
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+tf=TfidfVectorizer()
+text_tf=tf.fit_transform(data['Calling Remark'])
+text_tf
+
+
+# In[19]:
+
+
+#Split train and test(TF_IDF)
+from sklearn.model_selection import train_test_split
+X_train,X_test,y_train,y_test=train_test_split(text_tf,data['Intersted(Y/N'],test_size=0.3,random_state=123)
+
+
+# In[20]:
+
+
+##B.Model_selection and Evaluation
+from sklearn.naive_bayes import MultinomialNB
+from sklearn import metrics
+clf=MultinomialNB().fit(X_train,y_train)
+predicted=clf.predict(X_test)
+print("Accuracy:",metrics.accuracy_score(y_test,predicted))
+
+
+# In[ ]:
+
+
+
+
